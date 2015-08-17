@@ -63,6 +63,7 @@
 #define DR_PARAM_RULE_FALLBACK      (1<<1)
 #define DR_PARAM_STRICT_LEN         (1<<2)
 #define DR_PARAM_ONLY_CHECK         (1<<3)
+#define DR_PARAM_PROPAGATE_NUMBER   (1<<4)
 #define DR_PARAM_INTERNAL_TRIGGERED (1<<30)
 
 
@@ -115,6 +116,9 @@ static str gw_attrs_avp_spec = str_init("$avp(___dr_gw_att__)");
 /* AVP used to store GW Pri Prefix */
 static int gw_priprefix_avp = -1;
 static str gw_priprefix_avp_spec = { NULL, 0};
+
+static int propagate_number_avp = -1;
+static str propagate_number_avp_spec = { NULL, 0};
 
 /* AVP used to store RULE IDs */
 static int rule_id_avp = -1;
@@ -310,6 +314,7 @@ static param_export_t params[] = {
 	{"probing_reply_codes", STR_PARAM, &dr_probe_replies.s       },
 	{"persistent_state",    INT_PARAM, &dr_persistent_state      },
 	{"no_concurrent_reload",INT_PARAM, &no_concurrent_reload     },
+	{"propagate_number_avp", STR_PARAM, &propagate_number_avp_spec.s  },
 	{0, 0, 0}
 };
 
@@ -753,6 +758,10 @@ static int dr_init(void)
 		dr_fix_avp_definition( gw_priprefix_avp_spec, gw_priprefix_avp,
 			"GW PRI PREFIX");
 
+	if (propagate_number_avp_spec.s)
+		dr_fix_avp_definition( propagate_number_avp_spec, propagate_number_avp,
+			"PROPAGATE NUMBER");
+
 	if (rule_id_avp_spec.s)
 		dr_fix_avp_definition( rule_id_avp_spec, rule_id_avp, "RULE ID");
 
@@ -1114,6 +1123,9 @@ static int do_routing_1(struct sip_msg* msg, char* grp, char* _flags, char* wlst
 					flags |= DR_PARAM_ONLY_CHECK;
 					LM_DBG("only check the prefix\n");
 					break;
+				case 'P':
+					flags |= DR_PARAM_PROPAGATE_NUMBER;
+					LM_DBG("Will propagate number contained in the modparam pvar\n");
 				default:
 					LM_DBG("unknown flag : [%c] . Skipping\n",*p);
 			}
@@ -1749,6 +1761,11 @@ search_again:
 		}
 	}
 
+	if (flags & DR_PARAM_PROPAGATE_NUMBER) {
+		if (search_first_avp( 0, propagate_number_avp, &val, 0) != NULL) {
+			uri.user = val.s;
+		}
+	}
 	/* iterate through the list, skip the disabled destination */
 	for ( i=0 ; i<rt_info->pgwa_len ; i++ ) {
 
