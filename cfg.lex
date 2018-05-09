@@ -372,6 +372,7 @@ OPEN_FD_LIMIT		"open_files_limit"
 MCAST_LOOPBACK		"mcast_loopback"
 MCAST_TTL			"mcast_ttl"
 TOS					"tos"
+TCP_REUSE_PORT		"tcp_reuse_port"
 DISABLE_DNS_FAILOVER  "disable_dns_failover"
 DISABLE_DNS_BLACKLIST "disable_dns_blacklist"
 DST_BLACKLIST		"dst_blacklist"
@@ -711,6 +712,8 @@ IMPORTFILE      "import_file"
 									return MCAST_TTL; }
 <INITIAL>{TOS}				{	count(); yylval.strval=yytext;
 									return TOS; }
+<INITIAL>{TCP_REUSE_PORT}			{ count(); yylval.strval=yytext;
+									return TCP_REUSE_PORT; }
 <INITIAL>{DISABLE_DNS_FAILOVER}	{	count(); yylval.strval=yytext;
 									return DISABLE_DNS_FAILOVER; }
 <INITIAL>{DISABLE_DNS_BLACKLIST}	{	count(); yylval.strval=yytext;

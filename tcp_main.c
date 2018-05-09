@@ -143,6 +143,10 @@ enum poll_types tcp_poll_method=0; 	/*!< by default choose the best method */
 int tcp_max_connections=DEFAULT_TCP_MAX_CONNECTIONS;
 int tcp_max_fd_no=0;
 
+#ifdef HAVE_SO_REUSEPORT
+    int tcp_reuse_port = 0;
+#endif
+
 #ifdef HAVE_SO_KEEPALIVE
     int tcp_keepalive = 1;
 #else
@@ -237,6 +241,15 @@ static int init_sock_opt(int s)
 	if ( (tcp_proto_no!=-1) && (setsockopt(s, tcp_proto_no , TCP_NODELAY,
 					&flags, sizeof(flags))<0) ){
 		LM_WARN("could not disable Nagle: %s\n", strerror(errno));
+	}
+#endif
+#ifdef HAVE_SO_REUSEPORT
+	if (tcp_reuse_port) {
+		LM_INFO("enabling SO_REUSEPORT\n");
+		if ( (tcp_proto_no!=-1) && (setsockopt(s, SOL_SOCKET, SO_REUSEPORT,
+						&tcp_reuse_port, sizeof(tcp_reuse_port))<0) ){
+			LM_WARN("could not set SO_REUSEPORT: %s\n", strerror(errno));
+		}
 	}
 #endif
 	/* tos*/

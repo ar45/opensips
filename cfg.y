@@ -423,6 +423,7 @@ extern char *finame;
 %token MCAST_LOOPBACK
 %token MCAST_TTL
 %token TOS
+%token TCP_REUSE_PORT
 %token DISABLE_DNS_FAILOVER
 %token DISABLE_DNS_BLACKLIST
 %token DST_BLACKLIST
@@ -1353,6 +1354,10 @@ assign_stm: DEBUG EQUAL snumber {
 		| TOS EQUAL NUMBER { tos = $3;
 							if (tos<=0)
 								yyerror("invalid tos value");
+		 }
+		| TCP_REUSE_PORT EQUAL NUMBER { tcp_reuse_port = $3;
+							if (tcp_reuse_port<=0)
+								yyerror("invalid tcp_reuse_port value");
 		 }
 		| TOS EQUAL ID { if (strcasecmp($3,"IPTOS_LOWDELAY")) {
 								tos=IPTOS_LOWDELAY;

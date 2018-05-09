@@ -98,6 +98,13 @@
     #endif
 #endif
 
+/* portreuse */
+#ifndef NO_SO_REUSEPORT
+    #ifdef __OS_linux
+        #define HAVE_SO_REUSEPORT
+    #endif
+#endif
+
 
 enum tcp_req_errors {	TCP_REQ_INIT, TCP_REQ_OK, TCP_READ_ERROR,
 		TCP_REQ_OVERRUN, TCP_REQ_BAD_LEN };

@@ -280,6 +280,8 @@ int mcast_ttl = -1; /* if -1, don't touch it, use the default (usually 1) */
 
 int tos = IPTOS_LOWDELAY;
 
+int so_reuseport = 0;
+
 struct socket_info* udp_listen=0;
 #ifdef USE_TCP
 struct socket_info* tcp_listen=0;
