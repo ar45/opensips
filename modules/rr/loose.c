@@ -713,10 +713,12 @@ static inline int after_loose(struct sip_msg* _m, int preloaded)
 	rt = (rr_t*)hdr->parsed;
 	uri = rt->nameaddr.uri;
 
-	if (parse_uri(uri.s, uri.len, &puri) < 0) {
+	if (parse_uri(uri.s, rt->len, &puri) < 0) {
 		LM_ERR("failed to parse the first route URI\n");
 		return RR_ERROR;
 	}
+	/* reparse the host so that we get rid of the trailing '>' */
+	if (puri.host.len && *(puri.host.s + puri.host.len -1) == '>') puri.host.len--;
 
 	/* IF the URI was added by me, remove it */
 #ifdef ENABLE_USER_CHECK
@@ -771,10 +773,14 @@ static inline int after_loose(struct sip_msg* _m, int preloaded)
 			force_ss = 0;
 			/* double route may occure due different IP and port, so force as
 			 * send interface the one advertise in second Route */
-			if (parse_uri(rt->nameaddr.uri.s,rt->nameaddr.uri.len,&puri)<0) {
+			if (parse_uri(rt->nameaddr.uri.s,rt->len,&puri)<0) {
 				LM_ERR("failed to parse the double route URI\n");
 				return RR_ERROR;
 			}
+			if (puri.host.len && *(puri.host.s + puri.host.len -1) == '>') {
+				puri.host.len--;
+			}
+
 			set_sip_defaults( puri.port_no, puri.proto);
 			si = grep_sock_info( &puri.host, puri.port_no, puri.proto);
 			if (si) {
@@ -816,9 +822,13 @@ static inline int after_loose(struct sip_msg* _m, int preloaded)
 		}
 
 		uri = rt->nameaddr.uri;
-		if (parse_uri(uri.s, uri.len, &puri2) < 0) {
+		if (parse_uri(uri.s, rt->len, &puri2) < 0) {
 			LM_ERR("failed to parse the first route URI\n");
 			return RR_ERROR;
+		}
+
+		if (puri2.host.len && *(puri2.host.s + puri2.host.len -1) == '>') {
+			puri2.host.len--;
 		}
 	} else {
 #ifdef ENABLE_USER_CHECK
