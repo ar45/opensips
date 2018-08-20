@@ -450,6 +450,16 @@ deb:
 		-rfakeroot -tc $(DEBBUILD_EXTRA_OPTIONS)
 	rm -rf debian
 
+.PHONY: deb-pbuilder
+deb-pbuilder:
+	export
+	rm -rf debian
+	cp -r packaging/debian debian
+	DIST=$(DEBIAN_VERSION) ARCH=amd64 PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-gdebi" pdebuild --use-pdebuild-internal --debbuildopts \
+	     '-I.git -I.gitignore -I*.swp -I*~ -i\\.git\|debian\|^\\.\\w+\\.swp\|lex\\.yy\\.c\|cfg\\.tab\\.\(c\|h\)\|\\w+\\.patch $(DEBBUILD_EXTRA_OPTIONS)'
+	rm -rf debian
+
+
 .PHONY: sunpkg
 sunpkg:
 	mkdir -p tmp/$(NAME)
