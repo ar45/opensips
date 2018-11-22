@@ -451,13 +451,16 @@ deb:
 	rm -rf debian
 
 .PHONY: deb-pbuilder
-deb-pbuilder:
+deb-pbuilder: deb-orig-tar
 	export
+	# Avoid accidentally overriding changes made
+	test ! -d debian || git diff --no-index debian/ packaging/debian/
 	rm -rf debian
-	ln -s packaging/debian debian
+	# dpkg-source cannot use links for debian source
+	cp -r packaging/debian debian
 	DIST=$(DEBIAN_VERSION) ARCH=amd64 PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-gdebi" pdebuild --use-pdebuild-internal --debbuildopts \
 	     '-I.git -I.gitignore -I*.swp -I*~ -i\\.git\|debian\|^\\.\\w+\\.swp\|lex\\.yy\\.c\|cfg\\.tab\\.\(c\|h\)\|\\w+\\.patch $(DEBBUILD_EXTRA_OPTIONS)'
-	rm debian
+	rm -rf debian
 
 
 .PHONY: sunpkg
