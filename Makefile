@@ -459,8 +459,12 @@ deb-pbuilder: deb-orig-tar
 	# dpkg-source cannot use links for debian source
 	cp -r packaging/debian debian
 	DIST=$(DEBIAN_VERSION) ARCH=amd64 PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-gdebi" pdebuild --use-pdebuild-internal --debbuildopts \
-	     '-I.git -I.gitignore -I*.swp -I*~ -i\\.git\|debian\|^\\.\\w+\\.swp\|lex\\.yy\\.c\|cfg\\.tab\\.\(c\|h\)\|\\w+\\.patch $(DEBBUILD_EXTRA_OPTIONS)'
+	     '-I.git -I.gitignore -I*.swp -I*~ -i\\.git\|debian\|\(^\\.\|/\\.\)[\\w\\.]+\\.swp\|lex\\.yy\\.c\|cfg\\.tab\\.\(c\|h\)\|\\w+\\.patch $(DEBBUILD_EXTRA_OPTIONS)'
 	rm -rf debian
+
+.PHONY: deb-pbuilder-%
+deb-pbuilder-%:
+	$(MAKE) deb-pbuilder DEBIAN_VERSION=$*
 
 
 .PHONY: sunpkg
