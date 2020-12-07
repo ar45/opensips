@@ -1833,7 +1833,7 @@ static char *dlg_get_json_out(struct dlg_cell *dlg,int ctx,int *out_len)
 		dlg->legs[DLG_CALLER_LEG].r_cseq.len,dlg->legs[DLG_CALLER_LEG].r_cseq.s,
 		dlg->legs[DLG_CALLER_LEG].route_set.len,dlg->legs[DLG_CALLER_LEG].route_set.s,
 		dlg->legs[DLG_CALLER_LEG].bind_addr->sock_str.len,dlg->legs[DLG_CALLER_LEG].bind_addr->sock_str.s,
-		dlg->legs[DLG_CALLER_LEG].out_sdp.len,dlg->legs[DLG_CALLER_LEG].out_sdp.s);
+		dlg->legs[DLG_CALLER_LEG].in_sdp.len,dlg->legs[DLG_CALLER_LEG].in_sdp.s);
 		
 		if (i<0) {
 			LM_ERR("Failed to print dlg json \n");		
@@ -1861,7 +1861,7 @@ static char *dlg_get_json_out(struct dlg_cell *dlg,int ctx,int *out_len)
 		dlg->legs[j].route_set.len,dlg->legs[j].route_set.s,
 		dlg->legs[j].bind_addr?dlg->legs[j].bind_addr->sock_str.len:0,
 		dlg->legs[j].bind_addr?dlg->legs[j].bind_addr->sock_str.s:NULL,
-		dlg->legs[j].out_sdp.len,dlg->legs[j].out_sdp.s);
+		dlg->legs[j].in_sdp.len,dlg->legs[j].in_sdp.s);
 
 		if (i<0) {
 			LM_ERR("Failed to print dlg json \n");
