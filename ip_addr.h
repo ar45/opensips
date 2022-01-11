@@ -170,8 +170,12 @@ struct socket_id {
  * we rely here on the fact at all the SIP protos are in a sequance */
 #define is_sip_proto(_proto) (PROTO_UDP<=(_proto) && (_proto)<=PROTO_WSS)
 
-struct net* mk_net(struct ip_addr* ip, struct ip_addr* mask);
-struct net* mk_net_bitlen(struct ip_addr* ip, unsigned int bitlen);
+struct net* _mk_net(struct ip_addr* ip, struct ip_addr* mask, int warn);
+struct net* _mk_net_bitlen(struct ip_addr* ip, unsigned int bitlen, int warn);
+
+#define mk_net(ip, bitlen) _mk_net(ip, bitlen, 1)
+#define mk_net_bitlen(ip, bitlen) _mk_net_bitlen(ip, bitlen, 1)
+#define mk_net_bitlen_no_warn(ip, bitlen) _mk_net_bitlen(ip, bitlen, 0)
 
 void print_ip(char* prefix, struct ip_addr* ip, char* suffix);
 void stdout_print_ip(struct ip_addr* ip);

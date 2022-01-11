@@ -1862,6 +1862,48 @@ int tr_eval_ip(struct sip_msg *msg, tr_param_t *tp,int subtype,
 			val->rs.s = _tr_buffer;
 
 			break;
+		case TR_IP_NET:
+			/* get the input which must be an IP addr as string */
+			if ( (p_ip=str2ip(&val->rs))==NULL &&
+			(p_ip=str2ip6(&val->rs))==NULL ) {
+				LM_ERR("Invalid input IP address <%.*s>\n",
+					   val->rs.len,val->rs.s);
+				goto error;
+			}
+			ip = *p_ip;
+			if (tp->type == TR_PARAM_NUMBER) {
+				len = tp->v.n;
+			} else {
+				if(pv_get_spec_value(msg, (pv_spec_p)tp->v.data, &v)!=0) {
+					LM_ERR("cannot get value from spec\n");
+					goto error;
+				}
+
+				if (v.flags&PV_VAL_INT) {
+					len = v.ri;
+				} else if (v.flags&PV_VAL_STR) {
+					if (str2int(&v.rs, &len)!=0 || len>p_ip->len*8) {
+						LM_ERR("Invalid mask len in parameter <%.*s>\n",
+							   v.rs.len,v.rs.s);
+						goto error;
+					}
+				} else {
+					LM_ERR("Invalid PV type for ip.net\n");
+					goto error;
+				}
+			}
+			mask = mk_net_bitlen_no_warn(p_ip, len);
+			if (!mask) {
+				goto error;
+			}
+			buffer = ip_addr2a(&mask->ip);
+			val->rs.len = strlen(buffer);
+			memcpy(_tr_buffer, buffer, val->rs.len);
+			val->rs.s = _tr_buffer;
+			val->flags = PV_VAL_STR;
+			pkg_free(mask);
+			break;
+
 		case TR_IP_MATCHES:
 			/* get the input which must be an IP addr as string */
 			if ( (p_ip=str2ip(&val->rs))==NULL &&
@@ -3570,7 +3612,7 @@ int tr_parse_ip(str *in, trans_t *t)
 	} else if (name.len == 7 && strncasecmp(name.s,"resolve",7) == 0) {
 		t->subtype = TR_IP_RESOLVE;
 		return 0;
-	} else if (name.len == 7 && strncasecmp(name.s,"matches",5) == 0) {
+	} else if (name.len == 7 && strncasecmp(name.s,"matches",7) == 0) {
 		t->subtype = TR_IP_MATCHES;
 		if(*p!=TR_PARAM_MARKER)
 		{
@@ -3581,6 +3623,19 @@ int tr_parse_ip(str *in, trans_t *t)
 		p++;
 		LM_DBG("preparing to parse param\n");
 		if (tr_parse_sparam(p, in, &t->params, 0) == NULL)
+			goto error;
+		return 0;
+	} else if (name.len == 3 && strncasecmp(name.s,"net",3) == 0) {
+		t->subtype = TR_IP_NET;
+		if(*p!=TR_PARAM_MARKER)
+		{
+			LM_ERR("invalid value transformation: %.*s\n",
+					in->len, in->s);
+			goto error;
+		}
+		p++;
+		LM_DBG("preparing to parse param for ip.net\n");
+		if (tr_parse_nparam(p, in, &t->params) == NULL)
 			goto error;
 		return 0;
 	} else if (name.len == 9 && strncasecmp(name.s,"isprivate",9) == 0) {

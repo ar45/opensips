@@ -39,7 +39,7 @@
 
 char _ip_addr_A_buff[IP_ADDR_MAX_STR_SIZE];
 
-struct net* mk_net(struct ip_addr* ip, struct ip_addr* mask)
+struct net* _mk_net(struct ip_addr* ip, struct ip_addr* mask, int warn)
 {
 	struct net* n;
 	int warning;
@@ -62,7 +62,7 @@ struct net* mk_net(struct ip_addr* ip, struct ip_addr* mask)
 		n->ip.u.addr32[r] &= n->mask.u.addr32[r];
 		if (n->ip.u.addr32[r]!=ip->u.addr32[r]) warning=1;
 	};
-	if (warning){
+	if (warn && warning){
 		LM_WARN("invalid network address/netmask "
 					"combination fixed...\n");
 		print_ip("original network address:", ip, "/");
@@ -77,7 +77,7 @@ error:
 
 
 
-struct net* mk_net_bitlen(struct ip_addr* ip, unsigned int bitlen)
+struct net* _mk_net_bitlen(struct ip_addr* ip, unsigned int bitlen, int warn)
 {
 	struct ip_addr mask;
 	unsigned int r;
@@ -92,7 +92,7 @@ struct net* mk_net_bitlen(struct ip_addr* ip, unsigned int bitlen)
 	mask.af=ip->af;
 	mask.len=ip->len;
 
-	return mk_net(ip, &mask);
+	return _mk_net(ip, &mask, warn);
 error:
 	return 0;
 }
